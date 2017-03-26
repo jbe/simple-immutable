@@ -309,6 +309,7 @@ var equals = SimpleImmutable.equals = function (a, b)
     if (a.length != b.length) return false;
     for (var i = 0; i<a.length; i++)
       if (!equals(a[i], b[i])) return false;
+    return true;
   }
 
   if (a.constructor == Object && b.constructor == Object)
@@ -321,6 +322,7 @@ var equals = SimpleImmutable.equals = function (a, b)
     for (k in a)
       if (a.hasOwnProperty(k))
         if (!equals(a[k], b[k])) return false;
+    return true;
   }
 
   return false;
