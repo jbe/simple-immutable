@@ -75,7 +75,7 @@ var doFreeze = typeof(__NODE_ENV__) == "undefined" ||
     __NODE_ENV__ != "production";
 
 if (doFreeze) {
-  console.log("SimpleImmutable running in debug (frozen) mode");
+  console.log("SimpleImmutable running in debug (freeze) mode");
 }
 
 var freeze = doFreeze ? Object.freeze : noop;
@@ -125,21 +125,20 @@ function prepare(v, shallow)
 function parsePath(path) {
   if (!path) throw new Error("Missing field name or path");
   if (typeof path == "string")   return path.split(".");
-  if (path.constructor == Array) return clone(path)
+  if (path.constructor == Array) return clone(path);
   return [path];
 }
 
 export default function SimpleImmutable(initial, shallow)
 {
+  if (initial.constructor == SimpleImmutable) return intial;
   if (!(this instanceof SimpleImmutable))
     return new SimpleImmutable(initial);
   this.v = prepare(initial, shallow);
-};
+}
 
 function scopedGet(scope, value) {
-  if (!scope || !scope.length)
-    return value;
-
+  if (!scope || !scope.length) return value;
   return scopedGet(scope, value[scope.shift()]);
 }
 
@@ -150,6 +149,7 @@ SimpleImmutable.prototype.get = function (path)
 
 SimpleImmutable.prototype.subtree = function (path)
 {
+  if (!path.length) return this;
   return SimpleImmutable(
     scopedGet(clone(path), this.v),
     true);
@@ -167,33 +167,41 @@ SimpleImmutable.prototype._toggle = function ()
 
 // Array methods
 
+SimpleImmutable.prototype.size = function ()
+{
+    validateByCtor(this, Array, "size", "plain Arrays");
+    return this.v.length;
+};
+
 SimpleImmutable.prototype.slice = function (start, end)
 {
-  validateByCtor(this, Array, "slice", "plain Arrays")
+  validateByCtor(this, Array, "slice", "plain Arrays");
+  if (!this.v.length) return this;
+  if (start == 0 && end == this.v.length) return this;
   return SimpleImmutable(this.v.slice(start, end), true);
 };
 
 SimpleImmutable.prototype.dropLast = function ()
 {
-  return this.slice(1, this.v.length);
+  return this.slice(0, this.v.length - 1);
 };
 
 SimpleImmutable.prototype.dropFirst = function ()
 {
-  return this.slice(0, this.v.length - 1);
+  return this.slice(1, this.v.length);
 };
 
-SimpleImmutable.prototype.cat = function (v)
+SimpleImmutable.prototype.concat = function (v)
 {
-  validateByCtor(this, Array, "Concatenation", "plain Arrays")
+  validateByCtor(this, Array, "Concatenation", "plain Arrays");
   return SimpleImmutable(this.v.concat(prepare(v)), true);
 };
 
 SimpleImmutable.prototype.push = function (v)
-{ return this.cat([v]); };
+{ return this.concat([v]); };
 
 SimpleImmutable.prototype.unshift = function (v)
-{ return SimpleImmutable([v], true).cat(this.v) };
+{ return SimpleImmutable([v], true).concat(this.v); };
 
 SimpleImmutable.prototype.forEach = function (fn)
 { this.v.forEach(fn); };
@@ -239,9 +247,14 @@ SimpleImmutable.prototype.merge = function ()
   var v = clone(this.v) || {};
 
   for (var i in arguments)
-    for (var k in arguments[i])
-      if (arguments[i].hasOwnProperty(k))
-        v[k] = arguments[i][k];
+  {
+    var resolved = arguments[i].constructor == SimpleImmutable
+        ? arguments[i].get()
+        : arguments[i];
+
+    for (var k in resolved)
+      if (arguments[i].hasOwnProperty(k)) v[k] = arguments[i][k];
+  }
 
   return SimpleImmutable(v, true);
 };
@@ -271,11 +284,44 @@ SimpleImmutable.prototype.toggle = function (path)
 SimpleImmutable.prototype.mergeAt = function (path, data)
 { return this.at(path, function(v) { return v.merge(data); }); };
 
-SimpleImmutable.prototype.catAt = function (path, data)
-{ return this.at(path, function(v) { return v.cat(data); }); };
+SimpleImmutable.prototype.concatAt = function (path, data)
+{ return this.at(path, function(v) { return v.concat(data); }); };
 
 SimpleImmutable.prototype.pushAt = function (path, data)
 { return this.at(path, function(v) { return v.push(data); }); };
 
 SimpleImmutable.prototype.unshiftAt = function (path, data)
 { return this.at(path, function(v) { return v.unshift(data); }); };
+
+function deepEquals()
+{
+}
+
+var equals = SimpleImmutable.equals = function (a, b)
+{
+  if (a.constructor == SimpleImmutable) a = a.get();
+  if (b.constructor == SimpleImmutable) b = b.get();
+
+  if (a === b) return true;
+
+  if (a.constructor == Array && b.constructor == Array)
+  {
+    if (a.length != b.length) return false;
+    for (var i = 0; i<a.length; i++)
+      if (!equals(a[i], b[i])) return false;
+  }
+
+  if (a.constructor == Object && b.constructor == Object)
+  {
+    var k, aKeys = 0, bKeys = 0;
+    for (k in a) if (a.hasOwnProperty(k)) aKeys++;
+    for (k in b) if (b.hasOwnProperty(k)) bKeys++;
+    if (aKeys.length != bKeys.length) return false;
+
+    for (k in a)
+      if (a.hasOwnProperty(k))
+        if (!equals(a[k], b[k])) return false;
+  }
+
+  return false;
+};
