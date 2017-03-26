@@ -1,0 +1,23 @@
+{
+  "name": "simple-immutable",
+  "version": "0.1.0",
+  "description": "Lightweight immutable data structures in JavaScript",
+  "main": "index.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jbe/simple-immutable.git"
+  },
+  "keywords": [
+    "immutable",
+    "collections",
+    "data-structures"
+  ],
+  "author": "Jostein B. Eliassen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jbe/simple-immutable/issues"
+  },
+  "homepage": "https://github.com/jbe/simple-immutable#readme"
+}
