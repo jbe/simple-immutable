@@ -1,6 +1,6 @@
 {
   "name": "simple-immutable",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "description": "Lightweight immutable data structures in JavaScript",
   "main": "index.js",
   "scripts": {
