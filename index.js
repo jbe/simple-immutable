@@ -123,7 +123,7 @@ function prepare(v, shallow)
 }
 
 function parsePath(path) {
-  if (!path) throw new Error("Missing field name or path");
+  if (!path) return [];
   if (typeof path == "string")   return path.split(".");
   if (path.constructor == Array) return clone(path);
   return [path];
@@ -144,7 +144,7 @@ function scopedGet(scope, value) {
 
 SimpleImmutable.prototype.get = function (path)
 {
-  return scopedGet(clone(path), this.v);
+  return scopedGet(parsePath(path), this.v);
 };
 
 SimpleImmutable.prototype.subtree = function (path)
@@ -264,7 +264,7 @@ SimpleImmutable.prototype.at = function(path, fn)
   path = parsePath(path);
 
   var modified = fn(
-    SimpleImmutable(
+    SimpleImmutable( // need to clone path because it is re-used!
       scopedGet(clone(path), this.v),
       true));
 
