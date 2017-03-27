@@ -24,14 +24,29 @@ Relatives: [globus](https://github.com/jbe/globus) | [immux](https://github.com/
 ```javascript
 import SimpleImmutable from "simple-immutable";
 
-const original = SimpleImmutable({a: 1, b: [1, 2, 3]});
+const original = SimpleImmutable({
+  a: 1,
+  b: [1, 2, 3],
+  c: {
+    foo: []
+  }
+});
 
 const modified = original
   .set("a", 0)
-  .set("c", false)
-  .pushAt("b", 4);
+  .pushAt("b", 4)
+  .pushAt(["c", "foo"], "foobarious")
+  .set("d", false);
 
-modified.get(); // => {a: 0, b: [1, 2, 3, 4], c: false}
+modified.get();
+// => {
+//   a: 0,
+//   b: [1, 2, 3, 4],
+//   c: {
+//     foo: ["foobarious"]
+//   },
+//   d: false
+//}
 
 ```
 
@@ -41,91 +56,91 @@ modified.get(); // => {a: 0, b: [1, 2, 3, 4], c: false}
 
 Create a new SimpleImmutable. Allowed values are numbers, strings, booleans, arrays, objects, and any nesting of those. Passing a value that is already a `SimpleImmutable` will simply return that value.
 
-#### get([path])
+##### get([path])
 
 Return the frozen plain value at `path`. Path is an array of field names or a single field name. Field names can be strings indexing objects or integers indexing arrays. Invalid paths will either return `undefined` or throw errors, in the same way that `undefined.foo` would.
 
-#### subtree(path)
+##### subtree(path)
 
 Same as `get`, except that it returns another `SimpleImmutable` rather than a plain value.
 
-#### size()
+##### size()
 
 Return the length of the array. Only valid on arrays.
 
-#### slice(start, end)
+##### slice(start, end)
 
 Return a new SimpleImmutable slice of the original array. Only valid on arrays. SimpleImmutable equivalent of `[].slice`.
 
-#### dropLast()
+##### dropLast()
 
 Same as `immutable.slice(0, immutable.size() - 1)`.
 
-#### dropFirst()
+##### dropFirst()
 
 Same as `immutable.slice(1, immutable.size())`.
 
-#### concat(value)
+##### concat(value)
 
 Concatenate values to end of array. Only valid on arrays. SimpleImmutable equivalent of `[].concat`.
 
-#### push(value)
+##### push(value)
 
 Append a value to the end of the array. Only valid on arrays. SimpleImmutable equivalent of `[].push`.
 
-#### unshift(value)
+##### unshift(value)
 
 Add an element to the beginning of the array. Only valid on arrays. SimpleImmutable equivalent of `[].unshift`.
 
-#### forEach(func)
+##### forEach(func)
 
 Call `func` on each key/value pair in the array or object, passing `value, key, objectValue`. SimpleImmutable equivalent of JavaScript `.forEach`.
 
-#### filter(func)
+##### filter(func)
 
 Call `func` on each value in the array, returning a new `SimpleImmutable` array consisting of all elements for which func returned true, preserving their order. Only valid on arrays. SimpleImmutable equivalent of `[].filter`.
 
-#### map(func)
+##### map(func)
 
 Call `func` on each value in the array, returning a new array consisting of the returned values. Only valid on arrays. SimpleImmutable equivalent of `[].map`.
 
-#### set(path, value)
+##### set(path, value)
 
 Set `path` to `value` in the data structure. Path is an array of indices or a single index, where strings index obejct fields and numbers index arrays. Invalid paths may cause errors by trying to look up fields on something that is `undefined`. Value can be either a `SimpleImmutable` or a plain value (the result is the same).
 
-#### merge(args...)
+##### merge(args...)
 
 Copies over all the key-value pairs from the passed arguments. Accepts both regular objects and `SimpleImmutable` objects.
 
-#### at(path, func)
+##### at(path, func)
 
 Use func to change the `SimpleImmutable` at `path`, returning an updated `SimpleImmutable` of the level from which `at` was called. Func will receive a `SimpleImmutable`, and can return either another `SimpleImmutable`, or data that will be convrted into one.
 
-#### del([path])
+##### del([path])
 
 Return a `SimpleImmutable` with the the key/value pair at `path` removed.
 
-#### toggle([path])
+##### toggle([path])
 
 Return a `SimpleImmutable` with its boolean value inverted. Only valid on booleans. In JavaScript, `!!` (double not) can be used to coerce any value into a boolean.
 
-#### mergeAt(path, data)
+##### mergeAt(path, data)
 
 Same as merge, but supports merging into a specified sub-path.
 
-#### concatAt(path)
+##### concatAt(path)
 
 Same as concat, but supports concatenating at a specified sub-path.
 
-#### pushAt(path)
+##### pushAt(path)
 
 Same as push, but supports pushing to a specified sub-path.
 
-#### unshiftAt(path)
+##### unshiftAt(path)
 
 Same as unshift, but supports unshifting to a specified sub-path.
 
-#### SimpleImmutable.equals
+##### SimpleImmutable.equals
 
 SimpleImmutable is designed to be used in functional-reactive frontend architectures where only reducers get to access the mutation api. The views themselves will only work on the data structures returned by `get`.
 
