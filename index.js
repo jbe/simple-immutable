@@ -131,7 +131,7 @@ function parsePath(path) {
 
 export default function SimpleImmutable(initial, shallow)
 {
-  if (initial.constructor == SimpleImmutable) return intial;
+  if (initial && initial.constructor == SimpleImmutable) return intial;
   if (!(this instanceof SimpleImmutable))
     return new SimpleImmutable(initial);
   this.v = prepare(initial, shallow);
